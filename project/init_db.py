@@ -7,11 +7,11 @@ connection = sqlite3.connect('instance/db.sqlite')
 #     connection.executescript(f.read())
 
 cur = connection.cursor()
-connection.executescript('''CREATE TABLE user (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT NOT NULL,
-    password TEXT NOT NULL,
-    login TEXT NOT NULL);''')
+# connection.executescript('''CREATE TABLE user (
+#     id INTEGER PRIMARY KEY AUTOINCREMENT,
+#     email TEXT NOT NULL,
+#     password TEXT NOT NULL,
+#     login TEXT NOT NULL);''')
 # cur.execute()execute
 
 # cur.execute("INSERT INTO posts (title, content) VALUES (?, ?)",

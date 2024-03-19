@@ -1,0 +1,9 @@
+.setting-button {
+    background-color: transparent;
+    background-repeat: no-repeat;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    width: 70px;
+    padding-top: 10px;
+}
