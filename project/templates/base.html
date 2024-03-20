@@ -20,27 +20,33 @@
 
         <button class="setting-button" data-bs-toggle="offcanvas"
                 data-bs-target="#offcanvasWithBothOptions"
-                aria-controls="offcanvasWithBothOptions">
+                aria-controls="offcanvasWithBothOptions" >
             <img src="static/img/settings.png">
         </button>
         <div style="background: #B2E3FF; width: 20%" class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
             <div class="offcanvas-header" style="background: #C6EAFF">
-                <img src="static/img/profile.png" style="height: 50px">
-                <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Елизавета</h5>
+                <a href="/profile"><img src="static/img/profile.png" style="height: 50px"></a>
+                <a href="/profile"><h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">{{ name }}</h5></a>
                 <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
             </div>
-            <div class="offcanvas-header">
-                <img src="static/img/favorites.png" style="height: 40px">
-                <h5 class="offcanvas-title" style="padding-left: 10px">Favorites</h5>
-            </div>
-            <div class="offcanvas-header">
-                <img src="static/img/search.png" style="height: 40px">
-                <h5 class="offcanvas-title" style="padding-left: 10px">Search</h5>
-            </div>
+            <a style="display: block" href="/favorites">
+                <div class="offcanvas-header" >
+                    <img src="static/img/favorites.png" style="height: 40px">
+                    <h5 class="offcanvas-title" style="padding-left: 10px">Favorites</h5>
+                </div>
+            </a>
+            <a style="display: block" href="/search">
+                <div class="offcanvas-header">
+                    <img src="static/img/search.png" style="height: 40px">
+                    <h5 class="offcanvas-title" style="padding-left: 10px">Search</h5>
+                </div>
+            </a>
+            <a style="display: block" href="/logout">
             <div class="offcanvas-header" style="padding-top: 50px">
                 <img src="static/img/logout.png" style="height: 40px">
                 <h5 class="offcanvas-title" style="padding-left: 10px">Logout</h5>
             </div>
+            </a>
         </div>
         <div class="hero-body">
             <div class="container has-text-centered">
