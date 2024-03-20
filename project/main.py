@@ -18,7 +18,10 @@ def index():
 @main.route('/profile')
 @login_required
 def profile():
-    return render_template('profile.html', name=current_user.login)
+    return render_template(
+        'profile.html',
+        name=current_user.login,
+        email=current_user.email)
 
 
 @main.route('/favorites')
