@@ -6,7 +6,7 @@ from . import db
 import sqlite3
 from flask_login import login_user, logout_user, login_required, current_user
 
-connection = sqlite3.connect('instance/db.sqlite', check_same_thread=False)
+connection = sqlite3.connect('../instance/db.sqlite', check_same_thread=False)
 cur = connection.cursor()
 auth = Blueprint('auth', __name__)
 
