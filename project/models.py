@@ -19,12 +19,12 @@ class Photo(db.Model):
     color = db.Column(db.String(100))
 
 
-class Interaction():
+class Interaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     img_id = db.Column(db.Integer)
     user_id = db.Column(db.Integer)
     state = db.Column(db.Integer) # 1 - like, 2 - dislike, 0 - not viewed 
-    timestamp = db.Column(db.DateTime, nullable=True)
+    date_time = db.Column(db.DateTime, nullable=True)
 
 
 
