@@ -1,7 +1,14 @@
-from flask import Blueprint, render_template, g
+from flask import Blueprint, render_template, g, request
 from flask_login import login_required, current_user, mixins
 from . import db
+import os
+import random
+import sqlite3
+import datetime
 
+connection = sqlite3.connect('instance/db.sqlite', check_same_thread=False)
+cur = connection.cursor()
+photos = cur.execute(f'''SELECT id, img_path FROM photo''').fetchall()
 main = Blueprint('main', __name__)
 
 
@@ -27,10 +34,25 @@ def profile():
 @main.route('/favorites')
 @login_required
 def favorites():
+
     return render_template('favorites.html', name=current_user.login)
 
 
-@main.route('/search')
+@main.route('/search', methods=['POST', 'GET'])
 @login_required
 def search():
-    return render_template('search.html', name=current_user.login)
+    status = request.form.get('status')
+    img_ids = cur.execute(f'''SELECT img_id FROM interaction WHERE user_id = (?)''', (current_user.id, )).fetchall()
+    if status != None:
+        status, im_path, im_id  = status.split()
+        cur.execute('''INSERT INTO interaction (img_id, user_id, state, date_time) VALUES (?, ?, ?, ?)''', 
+                        (im_id, current_user.id, int(status), datetime.datetime.now()))
+        connection.commit()
+    # print(cur.execute('''SELECT (img_id, user_id) from interaction''').fetchall())
+    im_id, path = random.choice(photos)
+    while im_id in img_ids:
+        im_id, path = random.choice(photos)
+    # print(path, im_id)
+    
+    return render_template('search.html', name=current_user.login, img_path=f'static/images/{path}', im_id=im_id)
+    
