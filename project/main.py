@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, g, request
+from flask import Blueprint, render_template, g, request, redirect, url_for
 from flask_login import login_required, current_user, mixins
 from . import db
 import os
@@ -23,12 +23,14 @@ def index():
 
 
 @main.route('/profile')
-@login_required
 def profile():
-    return render_template(
-        'profile.html',
-        name=current_user.login,
-        email=current_user.email)
+    if current_user.is_authenticated:
+        return render_template(
+            'profile.html',
+            name=current_user.login,
+            email=current_user.email)
+    else:
+        return redirect(url_for('auth.login'))
 
 
 @main.route('/favorites')

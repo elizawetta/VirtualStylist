@@ -22,7 +22,6 @@ def signup():
 
 
 @auth.route('/logout')
-@login_required
 def logout():
     logout_user()
     return redirect(url_for('main.index'))
@@ -45,18 +44,20 @@ def signup_post():
 
     db.session.add(new_user)
     db.session.commit()
-
-    return redirect(url_for('auth.login'))
+    login_user(new_user, remember=False)
+    return redirect(url_for('main.profile'))
 
 
 @auth.route('/login', methods=['POST'])
 def login_post():
+    # if request.method != 'post':
+    #     return render_template('login.html')
     email = request.form.get('email')
     password = request.form.get('password')
     remember = True if request.form.get('remember') else False
 
     user = User.query.filter_by(email=email).first()
-
+    
     if not user or not check_password_hash(user.password, password):
         flash('Please check your login details and try again.')
         return redirect(url_for('auth.login'))
