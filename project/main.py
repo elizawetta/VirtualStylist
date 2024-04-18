@@ -34,8 +34,10 @@ def profile():
 @main.route('/favorites')
 @login_required
 def favorites():
+    img_ids = cur.execute('''SELECT id, img_path FROM photo WHERE id IN 
+                          (SELECT img_id FROM interaction WHERE user_id = (?) AND state = 1)''', (current_user.id, )).fetchall()
 
-    return render_template('favorites.html', name=current_user.login)
+    return render_template('favorites.html', name=current_user.login, photos=img_ids)
 
 
 @main.route('/search', methods=['POST', 'GET'])

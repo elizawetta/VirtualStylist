@@ -4,9 +4,17 @@
 <h1 class="title">
   There will be your favorites!
 </h1>
-<div>
-  
-  
-</div>
+<!-- <div> -->
+{% for photo in photos %}
+<!-- <section class="container" >
+  <button class="fav_button" >
+    <i class="fa fa-heart" style="color:red"></i>
+  </button> 
+  <img class="fav_img" src="/static/images/{{ photo[1] }}"> 
+</section> -->
+
+<img class="fav_img" src="/static/images/{{ photo[1] }}"> 
+{% endfor %}
+<!-- </div> -->
 
 {% endblock %}
