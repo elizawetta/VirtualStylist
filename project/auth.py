@@ -45,7 +45,7 @@ def signup_post():
     db.session.add(new_user)
     db.session.commit()
     login_user(new_user, remember=False)
-    return redirect(url_for('main.profile'))
+    return redirect(url_for('main.search'))
 
 
 @auth.route('/login', methods=['POST'])

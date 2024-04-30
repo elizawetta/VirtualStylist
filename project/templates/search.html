@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="title">
+<h1 class="display-6" style="color: black; padding-bottom: 10px;">
   Search new outfits!
 </h1>
+
 <img class="search_img" src={{ img_path }} width="200px"> 
   <form method="post" action="/search">
     <button class="status_btn" type="submit" name="status" value="1 {{ img_path }} {{ im_id }}">

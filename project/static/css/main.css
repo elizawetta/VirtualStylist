@@ -9,7 +9,7 @@
     float: right;
 }
 
-.container {
+.cont {
     display: flex;
     flex-wrap: wrap;
 }
@@ -44,11 +44,12 @@
 .item button:hover .fa{
     color: gray; 
 }
+
 .search_img {
     border: 1px solid black; 
     border-radius: 10%;
     width: auto;
-    max-height: 500px;
+    max-height: 450px;
     margin: 5px;
 }
 

@@ -4,8 +4,13 @@
 <h1 class="display-6" style="color: black; padding-bottom: 10px;">
   Likes
 </h1>
+{% if count_img == 0  %}
+<h6 class="display-6" style="color: black; padding-bottom: 10px; font-size: x-large">
+  Нет понравившихся нарядов! <br/> <a href="/search"> На страницу поиска</a>
+</h1>
+{% endif %}
 <form action="/favorites" method="post">
-<div class="container">
+<div class="cont">
 {% for photo in photos %}
 <div class="item" >
   <button type="submit" name="dislike" value="{{ photo[1] }} {{ photo[0] }}" >

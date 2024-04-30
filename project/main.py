@@ -43,8 +43,9 @@ def favorites():
         connection.commit()
     img_ids = cur.execute('''SELECT id, img_path FROM photo WHERE id IN 
                           (SELECT img_id FROM interaction WHERE user_id = (?) AND state = 1)''', (current_user.id, )).fetchall()
-
-    return render_template('favorites.html', name=current_user.login, photos=img_ids)
+    
+    
+    return render_template('favorites.html', name=current_user.login, photos=img_ids, count_img=len(img_ids))
 
 
 @main.route('/search', methods=['POST', 'GET'])
@@ -63,3 +64,5 @@ def search():
     
     return render_template('search.html', name=current_user.login, img_path=f'static/images/{path}', im_id=im_id)
     
+
+
