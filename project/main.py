@@ -33,9 +33,14 @@ def profile():
         return redirect(url_for('auth.login'))
 
 
-@main.route('/favorites')
+@main.route('/favorites',  methods=['POST', 'GET'])
 @login_required
 def favorites():
+    if request.method == "POST":
+        dislike = request.form.get('dislike').split()
+        print(dislike)
+        cur.execute('''DELETE FROM interaction WHERE user_id = (?) AND img_id = (?)''', (current_user.id, dislike[1]))
+        connection.commit()
     img_ids = cur.execute('''SELECT id, img_path FROM photo WHERE id IN 
                           (SELECT img_id FROM interaction WHERE user_id = (?) AND state = 1)''', (current_user.id, )).fetchall()
 
@@ -52,11 +57,9 @@ def search():
         cur.execute('''INSERT INTO interaction (img_id, user_id, state, date_time) VALUES (?, ?, ?, ?)''', 
                         (im_id, current_user.id, int(status), datetime.datetime.now()))
         connection.commit()
-    # print(cur.execute('''SELECT (img_id, user_id) from interaction''').fetchall())
     im_id, path = random.choice(photos)
     while im_id in img_ids:
         im_id, path = random.choice(photos)
-    # print(path, im_id)
     
     return render_template('search.html', name=current_user.login, img_path=f'static/images/{path}', im_id=im_id)
     

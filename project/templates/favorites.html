@@ -2,19 +2,19 @@
 
 {% block content %}
 <h1 class="display-6" style="color: black; padding-bottom: 10px;">
-  Избранное
+  Likes
 </h1>
-<!-- <div> -->
+<form action="/favorites" method="post">
+<div class="container">
 {% for photo in photos %}
-<!-- <section class="container" >
-  <button class="fav_button" >
-    <i class="fa fa-heart" style="color:red"></i>
+<div class="item" >
+  <button type="submit" name="dislike" value="{{ photo[1] }} {{ photo[0] }}" >
+    <i class="fa fa-heart icon" ></i>
   </button> 
-  <img class="fav_img" src="/static/images/{{ photo[1] }}"> 
-</section> -->
-
-<img class="fav_img" src="/static/images/{{ photo[1] }}"> 
+  <img src="/static/images/{{ photo[1] }}"> 
+</div>
 {% endfor %}
-<!-- </div> -->
+</div>
+</form>
 
 {% endblock %}

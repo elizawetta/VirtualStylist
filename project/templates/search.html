@@ -2,15 +2,15 @@
 
 {% block content %}
 <h1 class="title">
-  There will be search!
+  Search new outfits!
 </h1>
-<img src={{ img_path }} width="200px"> 
+<img class="search_img" src={{ img_path }} width="200px"> 
   <form method="post" action="/search">
-    <button type="submit" name="status" value="1 {{ img_path }} {{ im_id }}">
-      <img src="static/img/like.png" width="20px"> 
+    <button class="status_btn" type="submit" name="status" value="1 {{ img_path }} {{ im_id }}">
+      <img src="static/img/like.png" width="50px"> 
     </button>
-    <button type="submit" name="status" value="2 {{ img_path }} {{ im_id }}">
-      <img src="static/img/dislike.png" width="20px"> 
+    <button class="status_btn" type="submit" name="status" value="2 {{ img_path }} {{ im_id }}">
+      <img src="static/img/dislike.png" width="40px"> 
     </button>
   </form>
 {% endblock %}
