@@ -51,9 +51,18 @@
     width: auto;
     max-height: 450px;
     margin: 5px;
+    max-width: 100%;
+    display: block;
 }
 
 .status_btn {
     border: 0;
     background: transparent;
+    display: block;
+}
+
+.clothes{
+    margin-bottom: 5px;
+    width: 100%;
+   
 }

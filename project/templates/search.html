@@ -4,14 +4,29 @@
 <h1 class="display-6" style="color: black; padding-bottom: 10px;">
   Search new outfits!
 </h1>
-
-<img class="search_img" src={{ img_path }} width="200px"> 
-  <form method="post" action="/search">
-    <button class="status_btn" type="submit" name="status" value="1 {{ img_path }} {{ im_id }}">
-      <img src="static/img/like.png" width="50px"> 
-    </button>
-    <button class="status_btn" type="submit" name="status" value="2 {{ img_path }} {{ im_id }}">
-      <img src="static/img/dislike.png" width="40px"> 
-    </button>
-  </form>
+<form method="post" action="/search">
+  <div style="display: flex; justify-content: center;">
+    <div>
+      <img class="search_img" src={{ img_path }} width="200px"> 
+        <div style="display: flex; justify-content: center;">
+          <button class="status_btn" type="submit" name="status" value="1 {{ im_id }}">
+            <img src="static/img/like.png" width="50px"> 
+          </button>
+          <button class="status_btn" type="submit" name="status" value="2 {{ im_id }}">
+            <img src="static/img/dislike.png" width="40px"> 
+          </button>
+        </div>
+    </div>
+    <div style="justify-content: center; align-items: center; margin-left: 40px; margin-top: 5%;">
+      <h6 class="display-6" style="color: black; padding-bottom: 10px; font-size: 19px; font-weight: 400;">
+        Понравившиеся вещи:
+      </h6>
+      {% for cl in clothes %}
+        <input type="checkbox" class="btn-check" name="{{ cl[1] }}" id="{{ cl[1] }}" autocomplete="off">
+        <label class="btn clothes  btn-outline-secondary" for="{{ cl[1] }}">{{ cl[0].capitalize() }}</label><br>
+      {% endfor %}
+    </div>
+  </div>
+  
+</form>
 {% endblock %}

@@ -8,7 +8,7 @@ import datetime
 
 connection = sqlite3.connect('instance/db.sqlite', check_same_thread=False)
 cur = connection.cursor()
-photos = cur.execute(f'''SELECT id, img_path FROM photo''').fetchall()
+photos = cur.execute(f'''SELECT id, img_path, clothes FROM photo''').fetchall()
 main = Blueprint('main', __name__)
 
 
@@ -51,18 +51,35 @@ def favorites():
 @main.route('/search', methods=['POST', 'GET'])
 @login_required
 def search():
-    status = request.form.get('status')
-    img_ids = cur.execute(f'''SELECT img_id FROM interaction WHERE user_id = (?)''', (current_user.id, )).fetchall()
-    if status != None:
-        status, im_path, im_id  = status.split()
-        cur.execute('''INSERT INTO interaction (img_id, user_id, state, date_time) VALUES (?, ?, ?, ?)''', 
+    if request.method == "POST":
+        status = request.form.get('status')
+        items = ','.join(list(map(lambda x: x[0], request.form.items()))[1:])
+        status, im_id  = status.split()
+        if status == '2':
+            cur.execute('''INSERT INTO interaction (img_id, user_id, state, date_time) VALUES (?, ?, ?, ?)''', 
                         (im_id, current_user.id, int(status), datetime.datetime.now()))
-        connection.commit()
-    im_id, path = random.choice(photos)
+            connection.commit()
+        elif len(items) == 0:
+            clothes = cur.execute(f'''SELECT clothes FROM photo WHERE id = {im_id} LIMIT 1''').fetchone()[0]
+            cur.execute(f'''INSERT INTO interaction (img_id, user_id, state, date_time, clothes) VALUES (?, ?, ?, ?, ?)''', 
+                        (im_id, current_user.id, int(status), datetime.datetime.now(), clothes))
+            connection.commit()
+        else:
+            cur.execute(f'''INSERT INTO interaction (img_id, user_id, state, date_time, clothes) VALUES (?, ?, ?, ?, ?)''', 
+                        (im_id, current_user.id, int(status), datetime.datetime.now(), items))
+            connection.commit()
+
+    img_ids = cur.execute('''SELECT img_id FROM interaction WHERE user_id = (?)''', (current_user.id, )).fetchall()
+    im_id, path, clothes = random.choice(photos)
     while im_id in img_ids:
-        im_id, path = random.choice(photos)
-    
-    return render_template('search.html', name=current_user.login, img_path=f'static/images/{path}', im_id=im_id)
+        im_id, path, clothes = random.choice(photos)
+    clothes = cur.execute(f'''SELECT clothes, clothes_id FROM clothes WHERE clothes_id IN ({clothes})''').fetchall()
+    clothes = set(clothes)
+
+    return render_template('search.html', 
+                           name=current_user.login, 
+                           img_path=f'static/images/{path}', 
+                           im_id=im_id, clothes=clothes)
     
 
 
