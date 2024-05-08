@@ -1,0 +1,10 @@
+pink
+red
+orange
+peach
+yellow
+green
+blue
+brown
+violet
+dark

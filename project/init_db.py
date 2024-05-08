@@ -27,9 +27,14 @@ connection.executescript('''CREATE TABLE photo (
                          wh FLOAT NOT NULL,
                          color TEXT NOT NULL
                          );''')
+connection.executescript('''CREATE TABLE clothes (
+                         id INTEGER PRIMARY KEY AUTOINCREMENT,
+                         clothes_id INTEGERNOT NULL,
+                         clothes TEXT NOT NULL);''')
 
 connection.executescript('''ALTER TABLE interaction 
                          ADD clothes TEXT;''')
+
 
 path = 'img_proessing/marked_images.csv'
 with open(path) as f:
@@ -37,12 +42,8 @@ with open(path) as f:
         i = i.strip().split(';')
         cur.execute("INSERT INTO photo (img_path, clothes, color_hsv, bl, wh, color) VALUES (?, ?, ?, ?, ?, ?)",
                     (i))
-connection.commit()
 
-connection.executescript('''CREATE TABLE clothes (
-                         id INTEGER PRIMARY KEY AUTOINCREMENT,
-                         clothes_id INTEGERNOT NULL,
-                         clothes TEXT NOT NULL);''')
+
 
 path = 'img_proessing/classes.txt'
 with open(path) as f:
@@ -51,6 +52,6 @@ with open(path) as f:
         j = f[i].strip()
         cur.execute("INSERT INTO clothes (clothes_id, clothes) VALUES (?, ?)",
                     (i, j))
-        print(i, j)
 connection.commit()
 connection.close()
+
