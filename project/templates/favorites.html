@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+<script src="static/script/main.js"></script>
 <h1 class="display-6" style="color: black; padding-bottom: 10px;">
   Likes
 </h1>
@@ -10,16 +11,21 @@
 </h1>
 {% endif %}
 <form action="/favorites" method="post">
-<div class="cont">
-{% for photo in photos %}
-<div class="item" >
-  <button type="submit" name="dislike" value="{{ photo[1] }} {{ photo[0] }}" >
-    <i class="fa fa-heart icon" ></i>
-  </button> 
-  <img src="/static/images/{{ photo[1] }}"> 
-</div>
-{% endfor %}
-</div>
+  <div class="cont">
+  {% for photo in photos %}
+  <div class="item" >
+    <button type="submit" name="dislike" value="{{ photo[1] }} {{ photo[0] }}" >
+      <i class="fa fa-heart icon" ></i>
+    </button> 
+    <img src="/static/images/{{ photo[1] }}" onclick="openModal('/static/images/{{ photo[1] }}')"> 
+  </div>
+  {% endfor %}
+  </div>
 </form>
+<div id="myModal" class="modal">
+  <span class="close" onclick="closeModal()">&times;</span>
+  <img class="modal-content" id="modalImg">
+</div>
+
 
 {% endblock %}

@@ -4,9 +4,10 @@
     border: none;
     cursor: pointer;
     outline: none;
-    width: 50px;
-    padding-top: 10px;
-    float: right;
+    width: 60px;
+    padding-top: 15px;
+    float: left;
+    padding-left: 15px;
 }
 
 .cont {
@@ -47,7 +48,7 @@
 
 .search_img {
     border: 1px solid black; 
-    border-radius: 10%;
+    border-radius: 1%;
     width: auto;
     max-height: 450px;
     margin: 5px;
@@ -66,3 +67,38 @@
     width: 100%;
    
 }
+.modal-content {
+    margin: auto;
+    display: block;
+    max-width: 70%;
+    max-height: 70%;
+    object-fit: contain;
+    border: 1px solid black; 
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    padding-top: 10px;
+    left: 0;
+    top: 0;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.7);
+  }
+.close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    transition: 0.3s;
+  }
+
+
+.close:hover, 
+.close:focus {
+  color: #bbb;
+  text-decoration: none;
+  cursor: pointer;
+}
+  
