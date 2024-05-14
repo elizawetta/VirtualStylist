@@ -5,7 +5,7 @@ import os
 import random
 import sqlite3
 import datetime
-
+from project.reco import reco1
 connection = sqlite3.connect('instance/db.sqlite', check_same_thread=False)
 cur = connection.cursor()
 photos = cur.execute(f'''SELECT id, img_path, clothes FROM photo''').fetchall()
@@ -68,13 +68,19 @@ def search():
             cur.execute(f'''INSERT INTO interaction (img_id, user_id, state, date_time, clothes) VALUES (?, ?, ?, ?, ?)''', 
                         (im_id, current_user.id, int(status), datetime.datetime.now(), items))
             connection.commit()
-
-    img_ids = cur.execute('''SELECT img_id FROM interaction WHERE user_id = (?)''', (current_user.id, )).fetchall()
-    im_id, path, clothes = random.choice(photos)
-    while im_id in img_ids:
+    
+    img_ids = cur.execute('''SELECT img_id FROM interaction WHERE user_id = (?)''', 
+                          (current_user.id, )).fetchall()
+    img_ids = cur.execute('''SELECT img_id FROM interaction WHERE user_id = (?)''', 
+                          (current_user.id, )).fetchall()
+    if len(img_ids) <= 0:
         im_id, path, clothes = random.choice(photos)
-    clothes = cur.execute(f'''SELECT clothes, clothes_id FROM clothes WHERE clothes_id IN ({clothes})''').fetchall()
-    clothes = set(clothes)
+        while im_id in img_ids:
+            im_id, path, clothes = random.choice(photos)
+        clothes = cur.execute(f'''SELECT clothes, clothes_id FROM clothes WHERE clothes_id IN ({clothes})''').fetchall()
+        clothes = set(clothes)
+    else:
+        im_id, path, clothes = reco1(current_user.id)
 
     return render_template('search.html', 
                            name=current_user.login, 
