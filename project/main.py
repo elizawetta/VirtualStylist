@@ -38,14 +38,21 @@ def profile():
 def favorites():
     if request.method == "POST":
         dislike = request.form.get('dislike').split()
-        print(dislike)
-        cur.execute('''DELETE FROM interaction WHERE user_id = (?) AND img_id = (?)''', (current_user.id, dislike[1]))
+        cur.execute('''DELETE FROM interaction WHERE user_id = (?) AND img_id = (?)''', 
+                    (current_user.id, dislike[1]))
         connection.commit()
-    img_ids = cur.execute('''SELECT id, img_path FROM photo WHERE id IN 
-                          (SELECT img_id FROM interaction WHERE user_id = (?) AND state = 1)''', (current_user.id, )).fetchall()
+        cur.execute('''INSERT INTO interaction (img_id, user_id, state, date_time) VALUES (?, ?, ?, ?)''', 
+                        (dislike[1], current_user.id, 2, datetime.datetime.now()))
+        connection.commit()
+    img_ids = cur.execute('''SELECT photo.id, photo.img_path, interaction.date_time 
+                          FROM photo JOIN interaction ON photo.id = interaction.img_id WHERE photo.id IN 
+                          (SELECT img_id FROM interaction WHERE user_id = (?) AND state = 1) 
+                          ORDER BY interaction.date_time DESC''', (current_user.id, )).fetchall()
     
     
-    return render_template('favorites.html', name=current_user.login, photos=img_ids, count_img=len(img_ids))
+    return render_template('favorites.html', 
+                           name=current_user.login, 
+                           photos=img_ids, count_img=len(img_ids))
 
 
 @main.route('/search', methods=['POST', 'GET'])
@@ -69,18 +76,7 @@ def search():
                         (im_id, current_user.id, int(status), datetime.datetime.now(), items))
             connection.commit()
     
-    img_ids = cur.execute('''SELECT img_id FROM interaction WHERE user_id = (?)''', 
-                          (current_user.id, )).fetchall()
-    img_ids = cur.execute('''SELECT img_id FROM interaction WHERE user_id = (?)''', 
-                          (current_user.id, )).fetchall()
-    if len(img_ids) <= 0:
-        im_id, path, clothes = random.choice(photos)
-        while im_id in img_ids:
-            im_id, path, clothes = random.choice(photos)
-        clothes = cur.execute(f'''SELECT clothes, clothes_id FROM clothes WHERE clothes_id IN ({clothes})''').fetchall()
-        clothes = set(clothes)
-    else:
-        im_id, path, clothes = reco1(current_user.id)
+    im_id, path, clothes = reco1(current_user.id)
 
     return render_template('search.html', 
                            name=current_user.login, 
