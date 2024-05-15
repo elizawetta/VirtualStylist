@@ -15,3 +15,19 @@ function closeModal() {
     modal.style.display = "none";
 }
   
+function selectAll() {
+  
+  var checkboxes = document.querySelectorAll('.btn-check');
+  var allChecked = true;
+
+  checkboxes.forEach(function(checkbox) {
+    if (!checkbox.checked) {
+      allChecked = false;
+    }
+  });
+
+  checkboxes.forEach(function(checkbox) {
+    checkbox.checked = !allChecked;
+  });
+  event.preventDefault();
+}

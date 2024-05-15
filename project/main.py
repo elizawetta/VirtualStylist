@@ -58,30 +58,63 @@ def favorites():
 @main.route('/search', methods=['POST', 'GET'])
 @login_required
 def search():
+    new = None
     if request.method == "POST":
-        status = request.form.get('status')
+        status, im_id = request.form.get('status').split()
+        prev_img = cur.execute(f'''SELECT * FROM interaction 
+                                   WHERE user_id = {current_user.id} 
+                                   AND img_id = {im_id}''').fetchall()
+        if len(prev_img) == 0:
+            cur.execute(f'''INSERT INTO interaction (img_id, user_id, state, date_time, clothes) 
+                            VALUES (?, ?, ?, ?, ?)''', 
+                        (im_id, current_user.id, 3, datetime.datetime.now(), None))
+            connection.commit()
+            
+        if status == 'prev':
+            all_photo = cur.execute(f'''SELECT * FROM interaction 
+                                 WHERE user_id = {current_user.id}''').fetchall()
+            for i in range(1, len(all_photo)):
+                if int(all_photo[i][1]) == int(im_id):
+                    new = all_photo[i - 1]
+                    break
+        elif status == 'next':
+            all_photo = cur.execute(f'''SELECT * FROM interaction 
+                                 WHERE user_id = {current_user.id}''').fetchall()
+            for i in range(len(all_photo) - 1):
+                if int(all_photo[i][1]) == int(im_id):
+                    new = all_photo[i + 1]
+                    break
+            
+        if new:
+            im_id, path, clothes = cur.execute(f'''SELECT id, img_path, clothes 
+                            FROM photo WHERE id = {new[1]} ''').fetchone()
+            clothes = cur.execute(f'''SELECT clothes, clothes_id FROM clothes WHERE clothes_id IN ({clothes})''').fetchall()
+            clothes = set(clothes)
+            return render_template('search.html', 
+                           name=current_user.login, 
+                           img_path=f'static/images/{path}', 
+                           im_id=im_id, clothes=clothes, prev=1, next=1)
+            
         items = ','.join(list(map(lambda x: x[0], request.form.items()))[1:])
-        status, im_id  = status.split()
         if status == '2':
-            cur.execute('''INSERT INTO interaction (img_id, user_id, state, date_time) VALUES (?, ?, ?, ?)''', 
-                        (im_id, current_user.id, int(status), datetime.datetime.now()))
+            cur.execute(f'''UPDATE interaction 
+                        SET state=2, date_time = (?), clothes=""
+                        WHERE img_id={im_id} AND user_id={current_user.id}''', 
+                        (str(datetime.datetime.now()), ))
             connection.commit()
-        elif len(items) == 0:
-            clothes = cur.execute(f'''SELECT clothes FROM photo WHERE id = {im_id} LIMIT 1''').fetchone()[0]
-            cur.execute(f'''INSERT INTO interaction (img_id, user_id, state, date_time, clothes) VALUES (?, ?, ?, ?, ?)''', 
-                        (im_id, current_user.id, int(status), datetime.datetime.now(), clothes))
+        elif status == '1':
+            if len(items) == 0:
+                items = cur.execute(f'''SELECT clothes FROM photo WHERE id = {im_id} LIMIT 1''').fetchone()[0]
+            cur.execute(f'''UPDATE interaction 
+                        SET state=1, date_time=(?), clothes=(?)
+                        WHERE img_id={im_id} AND user_id = {current_user.id}''', (str(datetime.datetime.now()), items, ))
             connection.commit()
-        else:
-            cur.execute(f'''INSERT INTO interaction (img_id, user_id, state, date_time, clothes) VALUES (?, ?, ?, ?, ?)''', 
-                        (im_id, current_user.id, int(status), datetime.datetime.now(), items))
-            connection.commit()
-    
+            
     im_id, path, clothes = reco1(current_user.id)
-
+    
     return render_template('search.html', 
                            name=current_user.login, 
                            img_path=f'static/images/{path}', 
-                           im_id=im_id, clothes=clothes)
+                           im_id=im_id, clothes=clothes, 
+                           prev=1, next=1)
     
-
-

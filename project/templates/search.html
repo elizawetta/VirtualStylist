@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+<script src="static/script/main.js"></script>
 <h1 class="display-6" style="color: black; padding-bottom: 10px;">
   Search new outfits!
 </h1>
@@ -9,12 +10,23 @@
     <div>
       <img class="search_img" src={{ img_path }} width="200px"> 
         <div style="display: flex; justify-content: center;">
+          {% if prev == 1 %}
+            <button class="status_btn" type="submit" name="status" value="prev {{ im_id }}">
+              <img src="static/img/prev.png" class="arrow">
+            </button>
+          {% endif %}
           <button class="status_btn" type="submit" name="status" value="1 {{ im_id }}">
             <img src="static/img/like.png" width="50px"> 
           </button>
           <button class="status_btn" type="submit" name="status" value="2 {{ im_id }}">
             <img src="static/img/dislike.png" width="40px"> 
           </button>
+          {% if prev == 1 %}
+          <button class="status_btn" type="submit" name="status" value="next {{ im_id }}">
+            <img src="static/img/next.png" class="arrow">
+          </button>
+          {% endif %}
+          
         </div>
     </div>
     <div style="justify-content: center; align-items: center; margin-left: 40px; margin-top: 5%;">
@@ -25,6 +37,8 @@
         <input type="checkbox" class="btn-check" name="{{ cl[1] }}" id="{{ cl[1] }}" autocomplete="off">
         <label class="btn clothes  btn-outline-secondary" for="{{ cl[1] }}">{{ cl[0].capitalize() }}</label><br>
       {% endfor %}
+      <button class="btn btn-outline-secondary" style="margin-top: 10px;" onclick="selectAll()">Выбрать все</button>
+      
     </div>
   </div>
   
