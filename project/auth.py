@@ -32,8 +32,7 @@ def signup_post():
     email = request.form.get('email')
     log = request.form.get('login')
     password = request.form.get('password')
-    user = cur.execute(f'''SELECT email FROM user WHERE email = (?)''', (email, )).fetchone()
-    # user = User.query.filter_by(email=email).first()
+    user = cur.execute('''SELECT email FROM user WHERE email = (?)''', (email, )).fetchone()
     if user:
         flash('Email address already exists')
         return redirect(url_for('auth.signup'))
@@ -50,8 +49,6 @@ def signup_post():
 
 @auth.route('/login', methods=['POST'])
 def login_post():
-    # if request.method != 'post':
-    #     return render_template('login.html')
     email = request.form.get('email')
     password = request.form.get('password')
     remember = True if request.form.get('remember') else False

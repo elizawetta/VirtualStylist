@@ -10,22 +10,18 @@
     <div>
       <img class="search_img" src={{ img_path }} width="200px"> 
         <div style="display: flex; justify-content: center;">
-          {% if prev == 1 %}
-            <button class="status_btn" type="submit" name="status" value="prev {{ im_id }}">
+          <button class="status_btn {% if prev == 0 %} disabled {% endif %}" type="submit" name="status" value="prev {{ im_id }}"  >
               <img src="static/img/prev.png" class="arrow">
-            </button>
-          {% endif %}
+          </button>
           <button class="status_btn" type="submit" name="status" value="1 {{ im_id }}">
             <img src="static/img/like.png" width="50px"> 
           </button>
           <button class="status_btn" type="submit" name="status" value="2 {{ im_id }}">
             <img src="static/img/dislike.png" width="40px"> 
           </button>
-          {% if prev == 1 %}
-          <button class="status_btn" type="submit" name="status" value="next {{ im_id }}">
+          <button class="status_btn {% if next == 0 %} disabled {% endif %}" type="submit" name="status" value="next {{ im_id }}"> 
             <img src="static/img/next.png" class="arrow">
           </button>
-          {% endif %}
           
         </div>
     </div>

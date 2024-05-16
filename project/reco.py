@@ -6,14 +6,14 @@ import random
 connection = sqlite3.connect('instance/db.sqlite', check_same_thread=False)
 cur = connection.cursor()
 dist_df = pd.read_csv('dist.csv', sep=';', index_col='img_id')
-photos = cur.execute(f'''SELECT id, img_path, clothes FROM photo''').fetchall()
+photos = cur.execute('''SELECT id, img_path, clothes FROM photo''').fetchall()
 
 def reco1(user):
-    img_ids = cur.execute(f'''SELECT img_id FROM interaction WHERE user_id = {user}''').fetchall()
+    img_ids = cur.execute('''SELECT img_id FROM interaction WHERE user_id = (?)''', (user, )).fetchall()
     user_likes = list(map(lambda x: x[0], cur.execute(f'''SELECT img_id FROM interaction 
-                             WHERE user_id = {user} AND state = 1''').fetchall()))
+                             WHERE user_id = (?) AND state = 1''', (user, )).fetchall()))
     user_dislikes = list(map(lambda x: x[0], cur.execute(f'''SELECT img_id FROM interaction 
-                             WHERE user_id = {user} AND state = 2''').fetchall()))
+                             WHERE user_id = (?) AND state = 2''', (user, )).fetchall()))
     reco = []
     for i in user_likes[-5:]:
         reco += dist_df[str(i)].sort_values().index[1:10].to_list()
@@ -29,8 +29,9 @@ def reco1(user):
         while im_id in img_ids:
             im_id, path, clothes = random.choice(photos)
     else:
-        im_id, path, clothes = cur.execute(f'''SELECT id, img_path, clothes 
-                            FROM photo WHERE id = {reco_im_id} ''').fetchone()
-    clothes = cur.execute(f'''SELECT clothes, clothes_id FROM clothes WHERE clothes_id IN ({clothes})''').fetchall()
+        im_id, path, clothes = cur.execute('''SELECT id, img_path, clothes 
+                            FROM photo WHERE id = (?)''', (reco_im_id, )).fetchone()
+    clothes = cur.execute(f'''SELECT clothes, clothes_id FROM clothes 
+                          WHERE clothes_id IN ({clothes})''').fetchall()
     clothes = set(clothes)
     return im_id, path, clothes

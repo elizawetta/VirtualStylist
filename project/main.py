@@ -8,7 +8,7 @@ import datetime
 from project.reco import reco1
 connection = sqlite3.connect('instance/db.sqlite', check_same_thread=False)
 cur = connection.cursor()
-photos = cur.execute(f'''SELECT id, img_path, clothes FROM photo''').fetchall()
+photos = cur.execute('''SELECT id, img_path, clothes FROM photo''').fetchall()
 main = Blueprint('main', __name__)
 
 
@@ -58,63 +58,76 @@ def favorites():
 @main.route('/search', methods=['POST', 'GET'])
 @login_required
 def search():
-    new = None
-    if request.method == "POST":
-        status, im_id = request.form.get('status').split()
-        prev_img = cur.execute(f'''SELECT * FROM interaction 
-                                   WHERE user_id = {current_user.id} 
-                                   AND img_id = {im_id}''').fetchall()
-        if len(prev_img) == 0:
-            cur.execute(f'''INSERT INTO interaction (img_id, user_id, state, date_time, clothes) 
-                            VALUES (?, ?, ?, ?, ?)''', 
-                        (im_id, current_user.id, 3, datetime.datetime.now(), None))
-            connection.commit()
-            
-        if status == 'prev':
-            all_photo = cur.execute(f'''SELECT * FROM interaction 
-                                 WHERE user_id = {current_user.id}''').fetchall()
-            for i in range(1, len(all_photo)):
-                if int(all_photo[i][1]) == int(im_id):
-                    new = all_photo[i - 1]
-                    break
-        elif status == 'next':
-            all_photo = cur.execute(f'''SELECT * FROM interaction 
-                                 WHERE user_id = {current_user.id}''').fetchall()
-            for i in range(len(all_photo) - 1):
-                if int(all_photo[i][1]) == int(im_id):
-                    new = all_photo[i + 1]
-                    break
-            
-        if new:
-            im_id, path, clothes = cur.execute(f'''SELECT id, img_path, clothes 
-                            FROM photo WHERE id = {new[1]} ''').fetchone()
-            clothes = cur.execute(f'''SELECT clothes, clothes_id FROM clothes WHERE clothes_id IN ({clothes})''').fetchall()
-            clothes = set(clothes)
-            return render_template('search.html', 
-                           name=current_user.login, 
-                           img_path=f'static/images/{path}', 
-                           im_id=im_id, clothes=clothes, prev=1, next=1)
-            
+    if request.method != 'POST':
+        im_id, path, clothes = reco1(current_user.id)
+        return render_template('search.html', name=current_user.login, img_path=f'static/images/{path}', 
+                           im_id=im_id, clothes=clothes, prev=0, next=0)
+
+    status, im_id = request.form.get('status').split()
+    image = cur.execute('''SELECT * FROM interaction 
+                                WHERE user_id = (?) 
+                                AND img_id = (?)''', (current_user.id, im_id, )).fetchone()
+    if status in '12' and image and str(image[3]) != status:
         items = ','.join(list(map(lambda x: x[0], request.form.items()))[1:])
-        if status == '2':
-            cur.execute(f'''UPDATE interaction 
-                        SET state=2, date_time = (?), clothes=""
-                        WHERE img_id={im_id} AND user_id={current_user.id}''', 
-                        (str(datetime.datetime.now()), ))
-            connection.commit()
-        elif status == '1':
-            if len(items) == 0:
-                items = cur.execute(f'''SELECT clothes FROM photo WHERE id = {im_id} LIMIT 1''').fetchone()[0]
-            cur.execute(f'''UPDATE interaction 
-                        SET state=1, date_time=(?), clothes=(?)
-                        WHERE img_id={im_id} AND user_id = {current_user.id}''', (str(datetime.datetime.now()), items, ))
-            connection.commit()
-            
-    im_id, path, clothes = reco1(current_user.id)
+        cur.execute('''UPDATE interaction 
+                        SET state = (?), date_time = (?), clothes = (?)
+                        WHERE img_id = (?) AND user_id = (?)''', 
+                        (int(status), str(datetime.datetime.now()), items, im_id, current_user.id, ))
+        connection.commit()
+    if not image:
+        items = ','.join(list(map(lambda x: x[0], request.form.items()))[1:])
+        cur.execute('''INSERT INTO interaction (img_id, user_id, state, date_time, clothes) 
+                        VALUES (?, ?, ?, ?, ?)''', 
+                    (im_id, current_user.id, int(status) if status in '12' else 3, 
+                     datetime.datetime.now(), items if status in '12' else '',))
+        connection.commit()
+
+    new = []
+    if status == 'prev':
+        all_photo = cur.execute('''SELECT * FROM interaction 
+                                WHERE user_id = (?)''', (current_user.id, )).fetchall()
+        for i in range(1, len(all_photo)):
+            if int(all_photo[i][1]) == int(im_id):
+                new = all_photo[i - 1][1]
+                prev = 0 if i == 1 else 1
+                next_ = 1
+                print('kek')
+                break
+    elif status == 'next':
+        all_photo = cur.execute('''SELECT * FROM interaction 
+                                WHERE user_id = (?)''', (current_user.id, )).fetchall()
+        for i in range(len(all_photo) - 1):
+            if int(all_photo[i][1]) == int(im_id):
+                new = all_photo[i + 1][1]
+                print(i, len(all_photo))
+                next_ = 0 if i + 1 == len(all_photo) - 1 else 1
+                prev = 1
+                print('lol')
+                break 
+    if new:
+        im_id, path, clothes = cur.execute('''SELECT id, img_path, clothes 
+                        FROM photo WHERE id = (?)''', (new, )).fetchone()
+        clothes = cur.execute(f'''SELECT clothes, clothes_id 
+                                FROM clothes WHERE clothes_id IN ({clothes})''').fetchall()
+        clothes = set(clothes)
+    else:
+        image = cur.execute('''SELECT img_id FROM interaction 
+                                WHERE user_id = (?) 
+                                AND state = 3''', (current_user.id, )).fetchone()
+        
+        if image:
+            im_id, path, clothes = cur.execute('''SELECT id, img_path, clothes 
+                        FROM photo WHERE id = (?)''', (image[0], )).fetchone()
+            clothes = cur.execute(f'''SELECT clothes, clothes_id 
+                                    FROM clothes WHERE clothes_id IN ({clothes})''').fetchall()
+            clothes = set(clothes)
+        else:
+            im_id, path, clothes = reco1(current_user.id)
+        prev = 1
+        next_ = 0
+        print(1, prev, next_)
+
+
     
-    return render_template('search.html', 
-                           name=current_user.login, 
-                           img_path=f'static/images/{path}', 
-                           im_id=im_id, clothes=clothes, 
-                           prev=1, next=1)
-    
+    return render_template('search.html', name=current_user.login, img_path=f'static/images/{path}', 
+                           im_id=im_id, clothes=clothes, prev=prev, next=next_)

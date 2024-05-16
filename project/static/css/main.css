@@ -105,3 +105,9 @@
 .arrow{
     width: 50px;
 }
+.disabled {
+    opacity: 0.5; /* Уменьшаем прозрачность */
+    cursor: not-allowed; /* Меняем вид курсора */
+    pointer-events: none; /* Отключаем события указателя */
+    
+  }
