@@ -26,7 +26,7 @@ def reco1(user):
     
     if reco_im_id == -1:
         im_id, path, clothes = random.choice(photos)
-        while im_id in img_ids:
+        while im_id in img_ids or im_id in user_likes or im_id in user_dislikes:
             im_id, path, clothes = random.choice(photos)
     else:
         im_id, path, clothes = cur.execute('''SELECT id, img_path, clothes 

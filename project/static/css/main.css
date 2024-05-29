@@ -110,4 +110,12 @@
     cursor: not-allowed; /* Меняем вид курсора */
     pointer-events: none; /* Отключаем события указателя */
     
-  }
+}
+
+
+.dropdown-menu {
+    max-height: 200px;
+    width: 150px;
+    overflow-y: auto; 
+    padding-left: 10px;
+}

@@ -6,6 +6,8 @@ import random
 import sqlite3
 import datetime
 from project.reco import reco1
+clothes_classes = list(map(str.strip, open('img_proessing/classes.txt').readlines()))
+
 connection = sqlite3.connect('instance/db.sqlite', check_same_thread=False)
 cur = connection.cursor()
 photos = cur.execute('''SELECT id, img_path, clothes FROM photo''').fetchall()
@@ -36,7 +38,11 @@ def profile():
 @main.route('/favorites',  methods=['POST', 'GET'])
 @login_required
 def favorites():
-    if request.method == "POST":
+    img_ids = cur.execute('''SELECT photo.id, photo.img_path, interaction.date_time 
+                            FROM photo JOIN interaction ON photo.id = interaction.img_id WHERE photo.id IN 
+                            (SELECT img_id FROM interaction WHERE user_id = (?) AND state = 1) 
+                            ORDER BY interaction.date_time DESC''', (current_user.id, )).fetchall()
+    if request.method == "POST" and request.form.get('dislike'):
         dislike = request.form.get('dislike').split()
         cur.execute('''DELETE FROM interaction WHERE user_id = (?) AND img_id = (?)''', 
                     (current_user.id, dislike[1]))
@@ -44,37 +50,54 @@ def favorites():
         cur.execute('''INSERT INTO interaction (img_id, user_id, state, date_time) VALUES (?, ?, ?, ?)''', 
                         (dislike[1], current_user.id, 2, datetime.datetime.now()))
         connection.commit()
-    img_ids = cur.execute('''SELECT photo.id, photo.img_path, interaction.date_time 
-                          FROM photo JOIN interaction ON photo.id = interaction.img_id WHERE photo.id IN 
-                          (SELECT img_id FROM interaction WHERE user_id = (?) AND state = 1) 
-                          ORDER BY interaction.date_time DESC''', (current_user.id, )).fetchall()
     
-    
+    elif request.method == "POST":
+        cl = request.form.getlist('cl') 
+        if len(cl) != 0:
+            clothes = '"'+'", "'.join(cl)+'"'
+            filter_id_clothes = cur.execute(f'''SELECT clothes_id FROM clothes WHERE clothes IN ({clothes})''').fetchall()
+            filter_id_clothes = set(map(lambda x: x[0], filter_id_clothes))
+            img_ids_all= cur.execute('''SELECT photo.id, photo.img_path, interaction.date_time, photo.clothes
+                            FROM photo JOIN interaction ON photo.id = interaction.img_id WHERE photo.id IN 
+                            (SELECT img_id FROM interaction WHERE user_id = (?) AND state = 1) 
+                            ORDER BY interaction.date_time DESC''', (current_user.id, )).fetchall()
+
+            img_ids = []
+            
+            for i in img_ids_all:
+                if len(set(map(int, i[3].split(','))).intersection(filter_id_clothes)) != 0:
+                    img_ids.append(i)
     return render_template('favorites.html', 
                            name=current_user.login, 
-                           photos=img_ids, count_img=len(img_ids))
+                           photos=img_ids, count_img=len(img_ids), 
+                           check_box=clothes_classes)
 
 
 @main.route('/search', methods=['POST', 'GET'])
 @login_required
 def search():
     if request.method != 'POST':
+        cnt = cur.execute('''SELECT COUNT (id) FROM interaction 
+                                WHERE user_id = (?)''', (current_user.id, )).fetchone()[0]
         im_id, path, clothes = reco1(current_user.id)
         return render_template('search.html', name=current_user.login, img_path=f'static/images/{path}', 
-                           im_id=im_id, clothes=clothes, prev=0, next=0)
+                           im_id=im_id, clothes=clothes, prev=int(cnt != 0), next=0)
 
     status, im_id = request.form.get('status').split()
     image = cur.execute('''SELECT * FROM interaction 
                                 WHERE user_id = (?) 
                                 AND img_id = (?)''', (current_user.id, im_id, )).fetchone()
-    if status in '12' and image and str(image[3]) != status:
+    if status in '12' and image:
         items = ','.join(list(map(lambda x: x[0], request.form.items()))[1:])
-        cur.execute('''UPDATE interaction 
-                        SET state = (?), date_time = (?), clothes = (?)
-                        WHERE img_id = (?) AND user_id = (?)''', 
-                        (int(status), str(datetime.datetime.now()), items, im_id, current_user.id, ))
+        cur.execute('''DELETE FROM interaction WHERE img_id = (?) AND user_id = (?)''', 
+                    (im_id, current_user.id, ))
         connection.commit()
-    if not image:
+        cur.execute('''INSERT INTO interaction (img_id, user_id, state, date_time, clothes) 
+                        VALUES (?, ?, ?, ?, ?)''', 
+                    (im_id, current_user.id, int(status), 
+                     datetime.datetime.now(), items,))
+        connection.commit()
+    elif not image:
         items = ','.join(list(map(lambda x: x[0], request.form.items()))[1:])
         cur.execute('''INSERT INTO interaction (img_id, user_id, state, date_time, clothes) 
                         VALUES (?, ?, ?, ?, ?)''', 
@@ -91,7 +114,6 @@ def search():
                 new = all_photo[i - 1][1]
                 prev = 0 if i == 1 else 1
                 next_ = 1
-                print('kek')
                 break
     elif status == 'next':
         all_photo = cur.execute('''SELECT * FROM interaction 
@@ -99,10 +121,8 @@ def search():
         for i in range(len(all_photo) - 1):
             if int(all_photo[i][1]) == int(im_id):
                 new = all_photo[i + 1][1]
-                print(i, len(all_photo))
                 next_ = 0 if i + 1 == len(all_photo) - 1 else 1
                 prev = 1
-                print('lol')
                 break 
     if new:
         im_id, path, clothes = cur.execute('''SELECT id, img_path, clothes 
@@ -125,8 +145,6 @@ def search():
             im_id, path, clothes = reco1(current_user.id)
         prev = 1
         next_ = 0
-        print(1, prev, next_)
-
 
     
     return render_template('search.html', name=current_user.login, img_path=f'static/images/{path}', 

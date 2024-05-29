@@ -1,6 +1,22 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="dropdown">
+  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+    Одежда на фото
+  </button>
+  <form id="checkboxForm" method="POST" action="/favorites">
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+      {% for cl in check_box %}
+        <li><label>
+        <input type="checkbox" name="cl" value="{{ cl }}"> {{ cl.capitalize() }} 
+        </label></li>
+      {% endfor %}
+    </ul>
+    <button type="submit">Submit</button>
+  </form>
+</div>
+
 <script src="static/script/main.js"></script>
 <h1 class="display-6" style="color: black; padding-bottom: 10px;">
   Likes
