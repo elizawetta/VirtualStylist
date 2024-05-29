@@ -1,26 +1,28 @@
 {% extends "base.html" %}
 
 {% block content %}
+<script src="static/script/main.js"></script>
+<h1 class="display-6" style="color: black; padding-bottom: 10px;">
+  Likes
+</h1>
 <div class="dropdown">
-  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin: 10px;">
     Одежда на фото
   </button>
   <form id="checkboxForm" method="POST" action="/favorites">
     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
       {% for cl in check_box %}
         <li><label>
-        <input type="checkbox" name="cl" value="{{ cl }}"> {{ cl.capitalize() }} 
+        <input type="checkbox" name="cl" value="{{ cl }}" 
+        {% if cl in is_checked %}checked{% endif %}> {{ cl.capitalize() }} 
         </label></li>
       {% endfor %}
     </ul>
-    <button type="submit">Submit</button>
+    <button class="btn btn-outline-secondary" style="margin: 10px;" type="submit">Найти</button>
   </form>
 </div>
 
-<script src="static/script/main.js"></script>
-<h1 class="display-6" style="color: black; padding-bottom: 10px;">
-  Likes
-</h1>
+
 {% if count_img == 0  %}
 <h6 class="display-6" style="color: black; padding-bottom: 10px; font-size: x-large">
   Нет понравившихся нарядов! <br/> <a href="/search"> На страницу поиска</a>

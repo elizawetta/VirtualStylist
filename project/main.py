@@ -42,6 +42,7 @@ def favorites():
                             FROM photo JOIN interaction ON photo.id = interaction.img_id WHERE photo.id IN 
                             (SELECT img_id FROM interaction WHERE user_id = (?) AND state = 1) 
                             ORDER BY interaction.date_time DESC''', (current_user.id, )).fetchall()
+    cl = []
     if request.method == "POST" and request.form.get('dislike'):
         dislike = request.form.get('dislike').split()
         cur.execute('''DELETE FROM interaction WHERE user_id = (?) AND img_id = (?)''', 
@@ -70,7 +71,7 @@ def favorites():
     return render_template('favorites.html', 
                            name=current_user.login, 
                            photos=img_ids, count_img=len(img_ids), 
-                           check_box=clothes_classes)
+                           check_box=clothes_classes, is_checked=cl)
 
 
 @main.route('/search', methods=['POST', 'GET'])
