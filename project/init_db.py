@@ -10,7 +10,7 @@ connection.executescript('''CREATE TABLE user (
                          email TEXT NOT NULL,
                          password TEXT NOT NULL,
                          login TEXT NOT NULL
-                         );''')
+#                          );''')
 connection.executescript('''CREATE TABLE interaction (
                          id INTEGER PRIMARY KEY AUTOINCREMENT,
                          img_id INTEGER NOT NULL,
