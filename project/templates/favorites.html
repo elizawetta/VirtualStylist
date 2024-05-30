@@ -5,11 +5,12 @@
 <h1 class="display-6" style="color: black; padding-bottom: 10px;">
   Likes
 </h1>
+<form method="POST" action="/favorites">
 <div class="dropdown">
   <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin: 10px;">
     Одежда на фото
   </button>
-  <form id="checkboxForm" method="POST" action="/favorites">
+  
     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
       {% for cl in check_box %}
         <li><label>
@@ -18,18 +19,10 @@
         </label></li>
       {% endfor %}
     </ul>
-    <button class="btn btn-outline-secondary" style="margin: 10px;" type="submit">Найти</button>
-  </form>
+    <button class="btn btn-outline-secondary" style="margin: 10px;" type="submit" name="action" value="find">Найти</button>
+    <button class="btn btn-outline-secondary" style="margin: 10px;" type="submit" name="action" value="clear">Очистить фильтр</button>
 </div>
-
-
-{% if count_img == 0  %}
-<h6 class="display-6" style="color: black; padding-bottom: 10px; font-size: x-large">
-  Нет понравившихся нарядов! <br/> <a href="/search"> На страницу поиска</a>
-</h1>
-{% endif %}
-<form action="/favorites" method="post">
-  <div class="cont">
+<div class="cont">
   {% for photo in photos %}
   <div class="item" >
     <button type="submit" name="dislike" value="{{ photo[1] }} {{ photo[0] }}" >
@@ -40,6 +33,12 @@
   {% endfor %}
   </div>
 </form>
+
+{% if count_img == 0  %}
+<h6 class="display-6" style="color: black; padding-bottom: 10px; font-size: x-large">
+  Нет понравившихся нарядов! <br/> <a href="/search"> На страницу поиска</a>
+</h1>
+{% endif %}
 <div id="myModal" class="modal">
   <span class="close" onclick="closeModal()">&times;</span>
   <img class="modal-content" id="modalImg">

@@ -6,8 +6,8 @@ import random
 import sqlite3
 import datetime
 from project.reco import reco1
-clothes_classes = list(map(str.strip, open('img_proessing/classes.txt').readlines()))
 
+clothes_classes = list(map(str.strip, open('img_proessing/classes.txt').readlines()))
 connection = sqlite3.connect('instance/db.sqlite', check_same_thread=False)
 cur = connection.cursor()
 photos = cur.execute('''SELECT id, img_path, clothes FROM photo''').fetchall()
@@ -27,8 +27,7 @@ def index():
 @main.route('/profile')
 def profile():
     if current_user.is_authenticated:
-        return render_template(
-            'profile.html',
+        return render_template('profile.html',
             name=current_user.login,
             email=current_user.email)
     else:
@@ -38,11 +37,7 @@ def profile():
 @main.route('/favorites',  methods=['POST', 'GET'])
 @login_required
 def favorites():
-    img_ids = cur.execute('''SELECT photo.id, photo.img_path, interaction.date_time 
-                            FROM photo JOIN interaction ON photo.id = interaction.img_id WHERE photo.id IN 
-                            (SELECT img_id FROM interaction WHERE user_id = (?) AND state = 1) 
-                            ORDER BY interaction.date_time DESC''', (current_user.id, )).fetchall()
-    cl = []
+    cl = request.form.getlist('cl')
     if request.method == "POST" and request.form.get('dislike'):
         dislike = request.form.get('dislike').split()
         cur.execute('''DELETE FROM interaction WHERE user_id = (?) AND img_id = (?)''', 
@@ -51,9 +46,9 @@ def favorites():
         cur.execute('''INSERT INTO interaction (img_id, user_id, state, date_time) VALUES (?, ?, ?, ?)''', 
                         (dislike[1], current_user.id, 2, datetime.datetime.now()))
         connection.commit()
-    
-    elif request.method == "POST":
-        cl = request.form.getlist('cl') 
+    if request.method == "POST" and request.form.get('action') == 'clear':
+        cl = []
+    elif request.method == "POST" and (request.form.get('action') == 'find' or cl):
         if len(cl) != 0:
             clothes = '"'+'", "'.join(cl)+'"'
             filter_id_clothes = cur.execute(f'''SELECT clothes_id FROM clothes WHERE clothes IN ({clothes})''').fetchall()
@@ -63,11 +58,14 @@ def favorites():
                             (SELECT img_id FROM interaction WHERE user_id = (?) AND state = 1) 
                             ORDER BY interaction.date_time DESC''', (current_user.id, )).fetchall()
 
-            img_ids = []
-            
-            for i in img_ids_all:
-                if len(set(map(int, i[3].split(','))).intersection(filter_id_clothes)) != 0:
-                    img_ids.append(i)
+            img_ids = [i for i in img_ids_all if filter_id_clothes <= set(map(int, i[3].split(',')))]
+
+    if not cl:
+        img_ids = cur.execute('''SELECT photo.id, photo.img_path, interaction.date_time 
+                            FROM photo JOIN interaction ON photo.id = interaction.img_id WHERE photo.id IN 
+                            (SELECT img_id FROM interaction WHERE user_id = (?) AND state = 1) 
+                            ORDER BY interaction.date_time DESC''', (current_user.id, )).fetchall()
+    
     return render_template('favorites.html', 
                            name=current_user.login, 
                            photos=img_ids, count_img=len(img_ids), 
@@ -146,7 +144,6 @@ def search():
             im_id, path, clothes = reco1(current_user.id)
         prev = 1
         next_ = 0
-
     
     return render_template('search.html', name=current_user.login, img_path=f'static/images/{path}', 
                            im_id=im_id, clothes=clothes, prev=prev, next=next_)
