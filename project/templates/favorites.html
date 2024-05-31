@@ -10,15 +10,26 @@
   <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin: 10px;">
     Одежда на фото
   </button>
-  
     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
       {% for cl in check_box %}
         <li><label>
         <input type="checkbox" name="cl" value="{{ cl }}" 
-        {% if cl in is_checked %}checked{% endif %}> {{ cl.capitalize() }} 
+        {% if cl in is_checked_cl %}checked{% endif %}> {{ cl.capitalize() }} 
         </label></li>
       {% endfor %}
     </ul>
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false" style="margin: 10px;">
+      Цвет на фото
+    </button>
+    
+      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+        {% for col in colors %}
+          <li><label>
+          <input type="checkbox" name="color" value="{{ col[0] }}" 
+          {% if col[0] in is_checked_col %}checked{% endif %}> {{ col[1].capitalize() }} 
+          </label></li>
+        {% endfor %}
+      </ul>
     <button class="btn btn-outline-secondary" style="margin: 10px;" type="submit" name="action" value="find">Найти</button>
     <button class="btn btn-outline-secondary" style="margin: 10px;" type="submit" name="action" value="clear">Очистить фильтр</button>
 </div>
@@ -43,6 +54,5 @@
   <span class="close" onclick="closeModal()">&times;</span>
   <img class="modal-content" id="modalImg">
 </div>
-
 
 {% endblock %}

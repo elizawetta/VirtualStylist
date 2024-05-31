@@ -1,10 +1,10 @@
-pink
-red
-orange
-peach
-yellow
-green
-blue
-brown
-violet
-dark
+pink розовый
+red красный
+orange оранжевый
+peach персиковый
+yellow желтый
+green зеленый
+blue голубой
+brown коричневый
+violet фиолетовый
+dark черный
