@@ -12,7 +12,7 @@ connection = sqlite3.connect('instance/db.sqlite', check_same_thread=False)
 cur = connection.cursor()
 photos = cur.execute('''SELECT id, img_path, clothes FROM photo''').fetchall()
 main = Blueprint('main', __name__)
-COLORS = list(map(lambda x: x.strip().split(), open('img_proessing/colors.txt').readlines()))
+colors = list(map(lambda x: x.strip().split(), open('img_proessing/colors.txt').readlines()))
 
 @main.route('/')
 def index():
@@ -39,7 +39,6 @@ def profile():
 def favorites():
     cl = request.form.getlist('cl') 
     col = request.form.getlist('color')
-    print(col) 
     if request.method == "POST" and request.form.get('dislike'):
         dislike = request.form.get('dislike').split()
         cur.execute('''DELETE FROM interaction WHERE user_id = (?) AND img_id = (?)''', 
@@ -52,29 +51,31 @@ def favorites():
         cl = []
         col = []
     elif request.method == "POST" and (request.form.get('action') == 'find' or cl or col):
-        img_ids= cur.execute('''SELECT photo.id, photo.img_path, interaction.date_time, photo.clothes, photo.color
-                            FROM photo JOIN interaction ON photo.id = interaction.img_id WHERE photo.id IN 
-                            (SELECT img_id FROM interaction WHERE user_id = (?) AND state = 1) 
-                            ORDER BY interaction.date_time DESC''', (current_user.id, )).fetchall()
+        img_ids = cur.execute('''SELECT photo.id, photo.img_path, photo.clothes, photo.color
+                              FROM photo JOIN interaction ON photo.id = interaction.img_id 
+                              WHERE interaction.state = 1 AND user_id = (?) 
+                              ORDER BY interaction.date_time DESC''', (current_user.id, )).fetchall()
         if len(cl) != 0:
             clothes = '"'+'", "'.join(cl)+'"'
             filter_id_clothes = cur.execute(f'''SELECT clothes_id FROM clothes WHERE clothes IN ({clothes})''').fetchall()
             filter_id_clothes = set(map(lambda x: x[0], filter_id_clothes))
-            img_ids = [i for i in img_ids if len(i[3]) > 1 and filter_id_clothes <= set(map(int, i[3].split(',')))]
-        if col:
-            img_ids = [i for i in img_ids if i[4] in col]
+            img_ids = [i for i in img_ids if len(i[3]) > 1 and filter_id_clothes <= set(map(int, i[2].split(',')))]
+        if len(col) != 0:
+            img_ids = [i for i in img_ids if i[3] in col]
 
     if not cl and not col:
+
+
         img_ids = cur.execute('''SELECT photo.id, photo.img_path, interaction.date_time 
-                            FROM photo JOIN interaction ON photo.id = interaction.img_id WHERE photo.id IN 
-                            (SELECT img_id FROM interaction WHERE user_id = (?) AND state = 1) 
-                            ORDER BY interaction.date_time DESC''', (current_user.id, )).fetchall()
-    
+                              FROM photo JOIN interaction ON photo.id = interaction.img_id 
+                              WHERE interaction.state = 1 AND user_id = (?) 
+                              ORDER BY interaction.date_time DESC''', (current_user.id, )).fetchall()
+        
     return render_template('favorites.html', 
                            name=current_user.login, 
                            photos=img_ids, count_img=len(img_ids), 
                            check_box=clothes_classes, is_checked_cl=cl, 
-                           colors=COLORS, is_checked_col=col)
+                           colors=colors, is_checked_col=col)
 
 
 @main.route('/search', methods=['POST', 'GET'])
